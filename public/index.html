@@ -95,13 +95,13 @@
     
       // Your web app's Firebase configuration
       const firebaseConfig = {
-        apiKey: "",
-        authDomain: "",
-        databaseURL: "",
-        projectId: "",
-        storageBucket: "",
-        messagingSenderId: "",
-        appId: "",
+        apiKey: "AIzaSyCxLDtEm0OdYuyS73c7AIGLHkQMGjpxwz8",
+        authDomain: "picutest-ebdff.firebaseapp.com",
+        databaseURL: "https://picutest-ebdff-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "picutest-ebdff",
+        storageBucket: "picutest-ebdff.appspot.com",
+        messagingSenderId: "817717607015",
+        appId: "1:817717607015:web:8d1618b76ff05cd7b972c2"
       };
     
       // Initialize Firebase
@@ -114,10 +114,10 @@
 
 
       function runDatabase() {
-        const dbRef = database.ref('/');
+        const dbRef = database.ref('/fruitList');
         console.log('ref > ', dbRef);
         // dbRef.push('').set({'hello': "world"});  // 쓰긴 쓰는데 key 를 자동으로 만들어버림 ref 랑 data 구조만 잘 잡으면 될 듯 
-        // dbRef.on('value', onSnapshot, {onlyOnce: true});  // 가져오기는 함. 뭐 다 좋음. 근데 ref.on('value', callbackFunc); 랑 ref.on('child_added', callbackFunc); 랑 차이를 모르겠음
+        dbRef.on('value', onSnapshot, {onlyOnce: true});  // 가져오기는 함. 뭐 다 좋음. 근데 ref.on('value', callbackFunc); 랑 ref.on('child_added', callbackFunc); 랑 차이를 모르겠음
         // dbRef.on('child_added', onSnapshot); // 가져오기는 함. 뭐 다 좋음. 근데 ref.on('value', callbackFunc); 랑 ref.on('child_added', callbackFunc); 랑 차이를 모르겠음
       }
 
@@ -129,6 +129,38 @@
       // db refs
       // https://softauthor.com/learn-to-build-firebase-crud-app-with-javascript-part01-reading-data/
       // https://www.slidesmaker.me/blog/firebase-realtime-database-crud-operations-javascript
+      //
+      // // ref functions
+      // firebase.database().ref().child('users/').on("child_added", (snapshot) => { console.log(snapshot.key + "" + snapshot.val()); });
+      // firebase.database().ref('messages/').on('value', (snapshot) => { console.log(snapshot.key + "" + snapshot.val()); });
+      // firebase.database().ref('messages/').push().set({'name': 'any-data', 'email': 'any-data', 'message': 'any-data' });
+      // firebase.database().ref('messages/' + 'row-id-here').update({'name': 'new-content', 'email': 'new-content', 'message': 'new-content' });
+      // firebase.database().ref('messages/' + 'row-id-here').remove();
+      // ref().child()
+      // ref().push()
+      // ref().update()
+      // ref().remove()
+      // ref().on()
+      //
+      // 아래부터 출처 
+      // https://firebase.google.com/docs/database/web/lists-of-data?hl=ko&authuser=0
+      // // on event listener
+      // > child_added :	항목 목록을 검색하거나 항목 목록에 대한 추가 사항을 수신합니다. 이 이벤트는 각 기존 자식에 대해 한 번 트리거된 다음 새 자식이 지정된 경로에 추가될 때마다 다시 트리거됩니다. 리스너는 새 하위 데이터가 포함된 스냅샷을 전달받습니다.
+      // > child_changed :	목록의 항목에 대한 변경 사항을 수신합니다. 이 이벤트는 자식 노드가 수정될 때마다 트리거됩니다. 여기에는 자식 노드의 자손에 대한 모든 수정 사항이 포함됩니다. 이벤트 리스너에 전달된 스냅샷에는 자식에 대한 업데이트된 데이터가 포함되어 있습니다.
+      // > child_removed :	목록에서 제거되는 항목을 수신합니다. 이 이벤트는 직계 자식이 제거될 때 트리거됩니다. 콜백 블록에 전달된 스냅샷에는 제거된 자식에 대한 데이터가 포함됩니다.
+      // > child_moved :	순서가 지정된 목록의 항목 순서에 대한 변경 사항을 수신합니다. child_moved 이벤트는 항상 항목의 주문 변경을 야기한 child_changed 이벤트를 따릅니다(현재 order-by 방법에 따라).
+      // // order function
+      // > orderByChild() : 	지정된 하위 키 또는 중첩된 하위 경로의 값을 기준으로 결과를 정렬합니다.
+      // > orderByKey() : 	하위 키별로 결과를 정렬합니다.
+      // > orderByValue() : 	하위 값을 기준으로 결과를 정렬합니다.
+      // > //filter function
+      // > limitToFirst() : 	정렬된 결과 목록의 시작 부분에서 반환할 최대 항목 수를 설정합니다.
+      // > limitToLast() : 	정렬된 결과 목록의 끝에서 반환할 최대 항목 수를 설정합니다.
+      // > startAt() : 	선택한 order-by 방법에 따라 지정된 키 또는 값보다 크거나 같은 항목을 반환합니다.
+      // > startAfter() : 	선택한 order-by 방법에 따라 지정된 키 또는 값보다 큰 항목을 반환합니다.
+      // > endAt() : 	선택한 order-by 방법에 따라 지정된 키 또는 값보다 작거나 같은 항목을 반환합니다.
+      // > endBefore() : 	선택한 order-by 방법에 따라 지정된 키 또는 값보다 작은 항목을 반환합니다.
+      // > equalTo() : 	선택한 order-by 방법에 따라 지정된 키 또는 값과 동일한 항목을 반환합니다.
     </script>
       
   </body>
