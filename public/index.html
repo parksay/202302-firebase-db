@@ -22,7 +22,15 @@
       to avoid connecting the SDK to running emulators.
     -->
     <script defer src="/__/firebase/init.js?useEmulator=true"></script>
-
+    <!-- end -->
+    <!--  -->
+    <!--
+      sweet alert
+    -->
+    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="sweetalert2.all.min.js"></script>
+    <!-- end -->
+    <!--  -->
     <style media="screen">
       body { background: #ECEFF1; color: rgba(0,0,0,0.87); font-family: Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; }
       #message { background: white; max-width: 360px; margin: 100px auto 16px; padding: 32px 24px; border-radius: 3px; }
@@ -46,6 +54,33 @@
       <a target="_blank" href="https://firebase.google.com/docs/hosting/">Open Hosting Documentation</a>
     </div>
     <p id="load">Firebase SDK Loading&hellip;</p>
+
+<!-- sweet alert -->
+    <script>
+        // isSuccess = true 
+        //  > success alert
+        // isSuccess = false 
+        //  > error alert
+        function showAlert(isSuccess) {
+          if(isSuccess === true) {
+            Swal.fire({
+              position: 'center',
+              icon: 'success',
+              title: '감사합니다. ',
+              text: '의견이 저장되었습니다.',
+              confirmButtonColor:'#7cd1f9',
+            });
+          } else {
+            Swal.fire({
+              icon: 'error',
+              title: '앗...',
+              text: '다시 시도해주세요.',
+              confirmButtonColor:'#e64942',
+            });
+          }
+        }
+    </script>
+<!-- !end! sweet alert -->
 
     <script>
       document.addEventListener('DOMContentLoaded', function() {
@@ -79,6 +114,7 @@
             'performance',
           ].filter(feature => typeof app[feature] === 'function');
           loadEl.textContent = `Firebase SDK loaded with ${features.join(', ')}`;
+          console.log('firebase.app > ', app);
         } catch (e) {
           console.error(e);
           loadEl.textContent = 'Error loading the Firebase SDK, check the console.';
@@ -92,7 +128,7 @@
       import { initializeApp } from "https://www.gstatic.com/firebasejs/9.16.0/firebase-app.js";
       // TODO: Add SDKs for Firebase products that you want to use
       // https://firebase.google.com/docs/web/setup#available-libraries
-    
+      //
       // Your web app's Firebase configuration
       const firebaseConfig = {
         apiKey: "AIzaSyCxLDtEm0OdYuyS73c7AIGLHkQMGjpxwz8",
@@ -103,26 +139,29 @@
         messagingSenderId: "817717607015",
         appId: "1:817717607015:web:8d1618b76ff05cd7b972c2"
       };
-    
+      //
       // Initialize Firebase
       const app = initializeApp(firebaseConfig);
+      const database = firebase.database();
+      //////////////////////////////////////////////////////////
       console.log('initializeApp > ', app);
       console.log('firebase > ', firebase);
-      const database = firebase.database();
       console.log('database > ', database);
-      runDatabase();
 
-
-      function runDatabase() {
-        const dbRef = database.ref('/fruitList');
-        console.log('ref > ', dbRef);
-        // dbRef.push('').set({'hello': "world"});  // 쓰긴 쓰는데 key 를 자동으로 만들어버림 ref 랑 data 구조만 잘 잡으면 될 듯 
-        dbRef.on('value', onSnapshot, {onlyOnce: true});  // 가져오기는 함. 뭐 다 좋음. 근데 ref.on('value', callbackFunc); 랑 ref.on('child_added', callbackFunc); 랑 차이를 모르겠음
+      // get data from database / put data into database
+      function putEval(letterTitle, userEmail, userEval) {
+        const dbRef = database.ref(`/${letterTitle}`);
+        // dbRef.on('value', onSnapshot, {onlyOnce: true});  // 가져오기는 함. 뭐 다 좋음. 근데 ref.on('value', callbackFunc); 랑 ref.on('child_added', callbackFunc); 랑 차이를 모르겠음
         // dbRef.on('child_added', onSnapshot); // 가져오기는 함. 뭐 다 좋음. 근데 ref.on('value', callbackFunc); 랑 ref.on('child_added', callbackFunc); 랑 차이를 모르겠음
+        dbRef.push(`${userEmail}`).set({email: userEmail, eval: userEval, param: location.search});  // 쓰긴 쓰는데 key 를 자동으로 만들어버림 ref 랑 data 구조만 잘 잡으면 될 듯 
+        //////////////////////////////////////////////////////////
+        console.log('ref > ', dbRef);
       }
 
+      // call back functions for database action
       function onSnapshot(snapshot) {
         const data = snapshot.val();
+        //////////////////////////////////////////////////////////
         console.log('onSnapshot > data', data );
       }
       
@@ -163,5 +202,47 @@
       // > equalTo() : 	선택한 order-by 방법에 따라 지정된 키 또는 값과 동일한 항목을 반환합니다.
     </script>
       
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        onLoadHandler();
+      });
+
+      function onLoadHandler() {
+        const paramKey = {letterTitle: 'title', userEmail: 'email', userEval: 'eval'};
+        const letterTitle = getParamByKey(paramKey.letterTitle);
+        const emailAddr = getParamByKey(paramKey.userEmail);
+        const userEval = getParamByKey(paramKey.userEval);
+        console.log('letterTitle', letterTitle);
+        console.log('emailAddr', emailAddr);
+        console.log('userEval', userEval);
+        putEval(letterTitle, emailAddr, userEval);
+        // showAlert(true);
+      }
+
+      // get parameter value from url
+      // http://localhost:5000/?testKey=testValue&email=hello@world.com&eval=good&title=myTest
+      // title > myTest
+      // email > hello@world.com
+      // eval > good
+      function getParamByKey(paramKey) {
+        const seperator = paramKey + '=';
+        const defaultResult = `uncaught value`;
+        const searchStrList = location.search.split('?')[1].split('&');
+        // null check
+        if( !(searchStrList && searchStrList.length > 0)) {
+          return defaultResult;
+        }
+        const paramFullStr = searchStrList.find((ele, idx, arr)=>{
+          return ele.startsWith(seperator);
+        });
+        if( !paramFullStr ) {
+          return defaultResult;
+        }
+        const splitList = paramFullStr.split(seperator);
+        const result = splitList[1];
+        return result;
+      }
+
+    </script>
   </body>
 </html>
