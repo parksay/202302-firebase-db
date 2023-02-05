@@ -150,10 +150,10 @@
 
       // get data from database / put data into database
       function putEval(letterTitle, userEmail, userEval) {
-        const dbRef = database.ref(`/${letterTitle}`);
+        const dbRef = database.ref(`${letterTitle}/${userEmail}/`);
         // dbRef.on('value', onSnapshot, {onlyOnce: true});  // 가져오기는 함. 뭐 다 좋음. 근데 ref.on('value', callbackFunc); 랑 ref.on('child_added', callbackFunc); 랑 차이를 모르겠음
         // dbRef.on('child_added', onSnapshot); // 가져오기는 함. 뭐 다 좋음. 근데 ref.on('value', callbackFunc); 랑 ref.on('child_added', callbackFunc); 랑 차이를 모르겠음
-        dbRef.push(`${userEmail}`).set({email: userEmail, eval: userEval, param: location.search});  // 쓰긴 쓰는데 key 를 자동으로 만들어버림 ref 랑 data 구조만 잘 잡으면 될 듯 
+        dbRef.push().set({email: userEmail, eval: userEval, time: getNowTimeStr(), param: location.search});  // 쓰긴 쓰는데 key 를 자동으로 만들어버림 ref 랑 data 구조만 잘 잡으면 될 듯 
         //////////////////////////////////////////////////////////
         console.log('ref > ', dbRef);
       }
@@ -200,12 +200,54 @@
       // > endAt() : 	선택한 order-by 방법에 따라 지정된 키 또는 값보다 작거나 같은 항목을 반환합니다.
       // > endBefore() : 	선택한 order-by 방법에 따라 지정된 키 또는 값보다 작은 항목을 반환합니다.
       // > equalTo() : 	선택한 order-by 방법에 따라 지정된 키 또는 값과 동일한 항목을 반환합니다.
-    </script>
-      
-    <script>
-      document.addEventListener('DOMContentLoaded', function() {
-        onLoadHandler();
-      });
+
+      /////////////////////////////////////////////////////////////////////////////////////
+
+      // get parameter value from url
+      // http://localhost:5000/?testKey=testValue&email=hello@world.com&eval=good&title=myTest
+      // title > myTest
+      // email > hello@world.com
+      // eval > good
+      function getParamByKey(paramKey) {
+        const seperator = paramKey + '=';
+        const defaultResult = `uncaught value`;
+        // null check
+        if( !(location.search && location.search.length > 0) ) {
+          return defaultResult;
+        }
+        //
+        const searchStrList = location.search.split('?')[1].split('&');
+        // null check
+        if( !(searchStrList && searchStrList.length > 0)) {
+          return defaultResult;
+        }
+        //
+        const paramFullStr = searchStrList.find((ele, idx, arr)=>{
+          return ele.startsWith(seperator);
+        });
+        // null check
+        if( !(paramFullStr && paramFullStr.length > 0) ) {
+          return defaultResult;
+        }
+        const splitList = paramFullStr.split(seperator);
+        const splitResult = splitList[1];
+        const escaped = splitResult.replaceAll(/[.*+?#^${}()|[\]\\]/g, '\\-');
+        return escaped;
+      }
+
+      // get now time str yyyy-mm-dd hh:mm:ss
+      function getNowTimeStr() {
+        const timeNow = new Date();
+        const year = timeNow.getFullYear();
+        const month = timeNow.getMonth() > 9 ? timeNow.getMonth() : `0${timeNow.getMonth()}`;
+        const day = timeNow.getDate() > 9 ? timeNow.getDate() : `0${timeNow.getDate()}`;
+        const hour = timeNow.getHours() > 9 ? timeNow.getHours() : `0${timeNow.getHours()}`;
+        const minute = timeNow.getMinutes() > 9 ? timeNow.getMinutes() : `0${timeNow.getMinutes()}`;
+        const second = timeNow.getSeconds() > 9 ? timeNow.getSeconds() : `0${timeNow.getSeconds()}`;
+        const ymd = [year, month, day].join(`-`);
+        const hms = [hour, minute, second].join(`:`);
+        return `${ymd} ${hms}`;
+      }
 
       function onLoadHandler() {
         const paramKey = {letterTitle: 'title', userEmail: 'email', userEval: 'eval'};
@@ -216,33 +258,13 @@
         console.log('emailAddr', emailAddr);
         console.log('userEval', userEval);
         putEval(letterTitle, emailAddr, userEval);
-        // showAlert(true);
+        // showAlert(true); // TODO: puEval 에서 리턴값 받고 정상 처리 여부 확인 후에 success or error 띄우기
       }
-
-      // get parameter value from url
-      // http://localhost:5000/?testKey=testValue&email=hello@world.com&eval=good&title=myTest
-      // title > myTest
-      // email > hello@world.com
-      // eval > good
-      function getParamByKey(paramKey) {
-        const seperator = paramKey + '=';
-        const defaultResult = `uncaught value`;
-        const searchStrList = location.search.split('?')[1].split('&');
-        // null check
-        if( !(searchStrList && searchStrList.length > 0)) {
-          return defaultResult;
-        }
-        const paramFullStr = searchStrList.find((ele, idx, arr)=>{
-          return ele.startsWith(seperator);
-        });
-        if( !paramFullStr ) {
-          return defaultResult;
-        }
-        const splitList = paramFullStr.split(seperator);
-        const result = splitList[1];
-        return result;
-      }
-
+      
+      document.addEventListener('DOMContentLoaded', function() {
+        onLoadHandler();
+      });
     </script>
+      
   </body>
 </html>
